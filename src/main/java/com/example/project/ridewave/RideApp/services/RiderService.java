@@ -4,12 +4,14 @@ import com.example.project.ridewave.RideApp.dto.DriverDTO;
 import com.example.project.ridewave.RideApp.dto.RideDTO;
 import com.example.project.ridewave.RideApp.dto.RideRequestDTO;
 import com.example.project.ridewave.RideApp.dto.RiderDTO;
+import com.example.project.ridewave.RideApp.entities.Rider;
+import com.example.project.ridewave.RideApp.entities.User;
 
 import java.util.List;
 
 public interface RiderService {
 
-    RideRequestDTO requestRide(Long rideId);
+    RideRequestDTO requestRide(RideRequestDTO rideRequestDTO);
 
     RideDTO cancelRide(Long rideId);
 
@@ -19,4 +21,6 @@ public interface RiderService {
     RiderDTO getMyProfile();
 
     List<RideDTO> getAllMyRides();
+
+    Rider createNewRider(User user);
 }
