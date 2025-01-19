@@ -3,7 +3,6 @@ package com.example.project.ridewave.RideApp.services.impl;
 import com.example.project.ridewave.RideApp.dto.DriverDTO;
 import com.example.project.ridewave.RideApp.dto.SignupDTO;
 import com.example.project.ridewave.RideApp.dto.UserDTO;
-import com.example.project.ridewave.RideApp.entities.Rider;
 import com.example.project.ridewave.RideApp.entities.User;
 import com.example.project.ridewave.RideApp.entities.enums.Role;
 import com.example.project.ridewave.RideApp.exceptions.RuntimeConflictException;
@@ -15,7 +14,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
 import java.util.Set;
 
 @Service

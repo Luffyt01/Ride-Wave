@@ -1,7 +1,6 @@
 package com.example.project.ridewave.RideApp.entities;
 
 import com.example.project.ridewave.RideApp.entities.enums.PaymentMethod;
-import com.example.project.ridewave.RideApp.entities.enums.RideRequestStatus;
 import com.example.project.ridewave.RideApp.entities.enums.RideStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

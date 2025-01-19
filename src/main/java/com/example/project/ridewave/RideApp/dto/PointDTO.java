@@ -2,7 +2,6 @@ package com.example.project.ridewave.RideApp.dto;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
 @Data
 @NoArgsConstructor

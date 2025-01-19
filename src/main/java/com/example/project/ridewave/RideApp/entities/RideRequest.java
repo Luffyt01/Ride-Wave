@@ -3,7 +3,10 @@ package com.example.project.ridewave.RideApp.entities;
 import com.example.project.ridewave.RideApp.entities.enums.PaymentMethod;
 import com.example.project.ridewave.RideApp.entities.enums.RideRequestStatus;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.locationtech.jts.geom.Point;
 

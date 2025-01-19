@@ -2,7 +2,6 @@ package com.example.project.ridewave.RideApp.strategies;
 
 import com.example.project.ridewave.RideApp.entities.Driver;
 import com.example.project.ridewave.RideApp.entities.RideRequest;
-import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 

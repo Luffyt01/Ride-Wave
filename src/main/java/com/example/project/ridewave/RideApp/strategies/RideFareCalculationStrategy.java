@@ -1,6 +1,5 @@
 package com.example.project.ridewave.RideApp.strategies;
 
-import com.example.project.ridewave.RideApp.dto.RideRequestDTO;
 import com.example.project.ridewave.RideApp.entities.RideRequest;
 
 public interface RideFareCalculationStrategy {

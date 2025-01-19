@@ -4,20 +4,21 @@ import com.example.project.ridewave.RideApp.dto.DriverDTO;
 import com.example.project.ridewave.RideApp.dto.RideDTO;
 import com.example.project.ridewave.RideApp.dto.RideRequestDTO;
 import com.example.project.ridewave.RideApp.dto.RiderDTO;
+import com.example.project.ridewave.RideApp.entities.Driver;
 import com.example.project.ridewave.RideApp.entities.RideRequest;
 import com.example.project.ridewave.RideApp.entities.Rider;
 import com.example.project.ridewave.RideApp.entities.User;
 import com.example.project.ridewave.RideApp.entities.enums.RideRequestStatus;
+import com.example.project.ridewave.RideApp.exceptions.ResourceNotFoundException;
 import com.example.project.ridewave.RideApp.repositories.RideRequestRepository;
 import com.example.project.ridewave.RideApp.repositories.RiderRepository;
 import com.example.project.ridewave.RideApp.services.RiderService;
-import com.example.project.ridewave.RideApp.strategies.DriverMatchingStrategy;
-import com.example.project.ridewave.RideApp.strategies.RideFareCalculationStrategy;
+import com.example.project.ridewave.RideApp.strategies.RideStrategyManager;
 import lombok.RequiredArgsConstructor;
-
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -29,20 +30,32 @@ public class RiderServiceImpl implements RiderService {
 
     private final RideRequestRepository rideRequestRepository;
     private final RiderRepository riderRepository;
-    private final RideFareCalculationStrategy rideFareCalculationStrategy;
-    private final DriverMatchingStrategy driverMatchingStrategy;
+    private final RideStrategyManager rideStrategyManager;
     private final ModelMapper modelMapper;
 
     @Override
+    @Transactional // using transactional will not make any change if any error occur in the function
+                   // it will roll back to previous state
+                   // it's like either all transaction happens or noting happens
     public RideRequestDTO requestRide(RideRequestDTO rideRequestDTO) {
+        // Get the current logged in rider
+        Rider rider = getCurrentRider();
+        // Create a ride request for the rider
         RideRequest rideRequest = modelMapper.map(rideRequestDTO, RideRequest.class);
+        // Setting the ride request status to pending as the rider has yet to confirm the ride
         rideRequest.setRideRequestStatus(RideRequestStatus.PENDING);
+        // setting the rider for the request
+        rideRequest.setRider(rider);
 
-        Double fare = rideFareCalculationStrategy.calculateFare(rideRequest);
+        // Generating the fare to the rider
+        // According to the pickup location and the drop off location
+        Double fare = rideStrategyManager.rideFareCalculationStrategy().calculateFare(rideRequest);
         rideRequest.setFare(fare);
+        // Saving the ride request
         RideRequest savedRideRequest =rideRequestRepository.save(rideRequest);
 
-        driverMatchingStrategy.findMatchingDrivers(rideRequest);
+        // Getting all the drivers available for the request
+        List<Driver> drivers = rideStrategyManager.driverMatchingStrategy(rider.getRating()).findMatchingDrivers(rideRequest);
 
         return modelMapper.map(savedRideRequest, RideRequestDTO.class);
     }
@@ -74,5 +87,12 @@ public class RiderServiceImpl implements RiderService {
                 .rating(0.0)
                 .build();
         return riderRepository.save(rider);
+    }
+
+    @Override
+    public Rider getCurrentRider() {
+        return riderRepository.findById(1L).orElseThrow(() -> new ResourceNotFoundException(
+                "Rider not found with id: "+ 1L
+        ));
     }
 }

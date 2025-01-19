@@ -1,7 +1,6 @@
 package com.example.project.ridewave.RideApp.dto;
 
 import com.example.project.ridewave.RideApp.entities.enums.Role;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
