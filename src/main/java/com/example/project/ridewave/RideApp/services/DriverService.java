@@ -3,8 +3,8 @@ package com.example.project.ridewave.RideApp.services;
 import com.example.project.ridewave.RideApp.dto.DriverDTO;
 import com.example.project.ridewave.RideApp.dto.RideDTO;
 import com.example.project.ridewave.RideApp.entities.Driver;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 public interface DriverService {
 
@@ -20,8 +20,9 @@ public interface DriverService {
 
     DriverDTO getMyProfile();
 
-    List<RideDTO> getAllMyRides();
+    Page<RideDTO> getAllMyRides(PageRequest pageRequest);
 
     Driver getCurrentDriver();
 
+    Driver updateDriverAvailability(Driver driver, boolean available);
 }

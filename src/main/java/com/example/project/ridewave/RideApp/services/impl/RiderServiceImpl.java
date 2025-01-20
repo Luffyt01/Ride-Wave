@@ -4,19 +4,21 @@ import com.example.project.ridewave.RideApp.dto.DriverDTO;
 import com.example.project.ridewave.RideApp.dto.RideDTO;
 import com.example.project.ridewave.RideApp.dto.RideRequestDTO;
 import com.example.project.ridewave.RideApp.dto.RiderDTO;
-import com.example.project.ridewave.RideApp.entities.Driver;
-import com.example.project.ridewave.RideApp.entities.RideRequest;
-import com.example.project.ridewave.RideApp.entities.Rider;
-import com.example.project.ridewave.RideApp.entities.User;
+import com.example.project.ridewave.RideApp.entities.*;
 import com.example.project.ridewave.RideApp.entities.enums.RideRequestStatus;
+import com.example.project.ridewave.RideApp.entities.enums.RideStatus;
 import com.example.project.ridewave.RideApp.exceptions.ResourceNotFoundException;
 import com.example.project.ridewave.RideApp.repositories.RideRequestRepository;
 import com.example.project.ridewave.RideApp.repositories.RiderRepository;
+import com.example.project.ridewave.RideApp.services.DriverService;
+import com.example.project.ridewave.RideApp.services.RideService;
 import com.example.project.ridewave.RideApp.services.RiderService;
 import com.example.project.ridewave.RideApp.strategies.RideStrategyManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +34,8 @@ public class RiderServiceImpl implements RiderService {
     private final RiderRepository riderRepository;
     private final RideStrategyManager rideStrategyManager;
     private final ModelMapper modelMapper;
+    private final RideService rideService;
+    private final DriverService driverService;
 
     @Override
     @Transactional // using transactional will not make any change if any error occur in the function
@@ -62,7 +66,20 @@ public class RiderServiceImpl implements RiderService {
 
     @Override
     public RideDTO cancelRide(Long rideId) {
-        return null;
+        Rider rider = getCurrentRider();
+        Ride ride = rideService.getRideById(rideId);
+
+        if (!rider.equals(ride.getRider())){
+            throw new RuntimeException("Rider does not own this ride with id" +rideId);
+        }
+
+        if (!ride.getRideStatus().equals(RideStatus.CONFIRMED)) {
+            throw new RuntimeException("Ride cannot be cancelled, invalid status: "+ride.getRideStatus());
+        }
+        Ride savedRide = rideService.updateRideStatus(ride, RideStatus.CANCELLED);
+        driverService.updateDriverAvailability(ride.getDriver(), true);
+
+        return modelMapper.map(savedRide, RideDTO.class);
     }
 
     @Override
@@ -72,12 +89,17 @@ public class RiderServiceImpl implements RiderService {
 
     @Override
     public RiderDTO getMyProfile() {
-        return null;
+        Rider currentRider = getCurrentRider();
+        return modelMapper.map(currentRider, RiderDTO.class);
     }
 
     @Override
-    public List<RideDTO> getAllMyRides() {
-        return List.of();
+    public Page<RideDTO> getAllMyRides(PageRequest pageRequest) {
+        Rider currentRider = getCurrentRider();
+        return rideService.getAllRidesOfRider(currentRider, pageRequest)
+                .map(
+                        ride -> modelMapper.map(ride, RideDTO.class)
+                );
     }
 
     @Override

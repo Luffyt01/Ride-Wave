@@ -1,9 +1,9 @@
 package com.example.project.ridewave.RideApp.services.impl;
 
-import com.example.project.ridewave.RideApp.dto.RideRequestDTO;
 import com.example.project.ridewave.RideApp.entities.Driver;
 import com.example.project.ridewave.RideApp.entities.Ride;
 import com.example.project.ridewave.RideApp.entities.RideRequest;
+import com.example.project.ridewave.RideApp.entities.Rider;
 import com.example.project.ridewave.RideApp.entities.enums.RideRequestStatus;
 import com.example.project.ridewave.RideApp.entities.enums.RideStatus;
 import com.example.project.ridewave.RideApp.exceptions.ResourceNotFoundException;
@@ -33,11 +33,7 @@ public class RideServiceImpl implements RideService {
                 .orElseThrow(() -> new ResourceNotFoundException("Ride not found with id: "+rideId));
     }
 
-    @Override
-    public void matchWithDrivers(RideRequestDTO rideRequestDTO) {
 
-
-    }
 
     @Override
     public Ride createNewRide(RideRequest rideRequest, Driver driver) {
@@ -57,17 +53,18 @@ public class RideServiceImpl implements RideService {
     @Override
     public Ride updateRideStatus(Ride ride, RideStatus rideStatus) {
         ride.setRideStatus(rideStatus);
+        rideRepository.save(ride);
         return ride;
     }
 
     @Override
-    public Page<Ride> getAllRidesOfRider(Long riderId, PageRequest pageRequest) {
-        return null;
+    public Page<Ride> getAllRidesOfRider(Rider rider, PageRequest pageRequest) {
+        return rideRepository.findByRider(rider, pageRequest);
     }
 
     @Override
-    public Page<Ride> getAllRidesOfDriver(Long driverId, PageRequest pageRequest) {
-        return null;
+    public Page<Ride> getAllRidesOfDriver(Driver driver, PageRequest pageRequest) {
+        return rideRepository.findByDriver(driver, pageRequest);
     }
 
 
