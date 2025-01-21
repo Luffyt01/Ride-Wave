@@ -18,6 +18,9 @@ public class RideStrategyManager {
     private final RideFareSurgePricingFareCalculationStrategy surgePricingFareCalculationStrategy;
     private final RiderFareDefaultFareCalculationStrategy defaultFareCalculationStrategy;
 
+
+    // Giving a list of highly rated drivers if the user rating is above 4.8
+    // else giving a list of nearest drivers
     public DriverMatchingStrategy driverMatchingStrategy(double riderRating){
         if (riderRating >= 4.8) {
             return highestRatedDriverStrategy;
@@ -26,6 +29,8 @@ public class RideStrategyManager {
         }
     }
 
+    // Calculating the ride fare
+    // if the rider books a ride between 6PM to 9PM then a surge fee is added
     public RideFareCalculationStrategy rideFareCalculationStrategy(){
         // 6 PM to 9 PM
 

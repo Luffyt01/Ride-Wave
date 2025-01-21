@@ -16,6 +16,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Table(
+        indexes = {
+                @Index(name = "idx_wallet_transaction_wallet", columnList = "wallet_id"),
+                @Index(name = "idx_wallet_transaction_ride", columnList = "ride_id")
+
+        }
+)
 public class WalletTransaction {
 
     @Id
@@ -28,7 +35,7 @@ public class WalletTransaction {
 
     private TransactionMethod transactionMethod;
 
-    @OneToOne
+    @ManyToOne
     private Ride ride;
 
     private String transactionId;
@@ -39,3 +46,5 @@ public class WalletTransaction {
     @CreationTimestamp
     private LocalDateTime timeStamp;
 }
+
+

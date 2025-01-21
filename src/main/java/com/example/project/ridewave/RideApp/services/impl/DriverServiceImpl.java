@@ -149,6 +149,20 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     public RideDTO rateRider(Long rideId, Integer rating) {
+        Ride ride = rideService.getRideById(rideId);
+        Driver driver = getCurrentDriver();
+
+        // checking if the current driver is the same driver who has accepted the rideRequest
+        if (!driver.equals(ride.getDriver())){
+            throw new RuntimeException("Driver is not the owner of this ride");
+        }
+
+        // Checking if the ride status is ENDED
+        // If ride status is CANCELED, ONGOING, CONFIRMED then throw exception
+        if (!ride.getRideStatus().equals(RideStatus.ENDED)){
+            throw new RuntimeException("Ride status is not ENDED hence cannot start rating, status: "+ride.getRideStatus());
+        }
+
         return null;
     }
 
@@ -176,6 +190,11 @@ public class DriverServiceImpl implements DriverService {
     @Override
     public Driver updateDriverAvailability(Driver driver, boolean available) {
         driver.setAvailable(available);
+        return driverRepository.save(driver);
+    }
+
+    @Override
+    public Driver createNewDriver(Driver driver) {
         return driverRepository.save(driver);
     }
 }
