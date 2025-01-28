@@ -9,12 +9,14 @@ import com.example.project.ridewave.RideApp.entities.enums.Role;
 import com.example.project.ridewave.RideApp.exceptions.ResourceNotFoundException;
 import com.example.project.ridewave.RideApp.exceptions.RuntimeConflictException;
 import com.example.project.ridewave.RideApp.repositories.UserRepository;
-import com.example.project.ridewave.RideApp.services.AuthService;
-import com.example.project.ridewave.RideApp.services.DriverService;
-import com.example.project.ridewave.RideApp.services.RiderService;
-import com.example.project.ridewave.RideApp.services.WalletService;
+import com.example.project.ridewave.RideApp.security.JWTService;
+import com.example.project.ridewave.RideApp.services.*;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,11 +31,26 @@ public class AuthServiceImpl implements AuthService {
     private final RiderService riderService;
     private final WalletService walletService;
     private final DriverService driverService;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JWTService jwtService;
 
 
     @Override
-    public String login(String email, String password) {
-        return "";
+    public String[] login(String email, String password) {
+            String[] tokens = new String[2];
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(email,password)
+            );
+
+            User user = (User) authentication.getPrincipal();
+
+            String accessToken = jwtService.generateAccessToken(user);
+            String refreshToken = jwtService.generateRefreshToken(user);
+
+            tokens[0] = accessToken;
+            tokens[1] = refreshToken;
+        return tokens;
     }
 
     @Override
@@ -47,6 +64,8 @@ public class AuthServiceImpl implements AuthService {
 
         User mappedUser = modelMapper.map(signupDTO, User.class);
         mappedUser.setRoles(Set.of(Role.RIDER));
+        mappedUser.setPassword(passwordEncoder.encode(mappedUser.getPassword()));
+
         User savedUser = userRepository.save(mappedUser);
 
         // create user related entities
@@ -77,5 +96,16 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
         Driver savedDriver = driverService.createNewDriver(createDriver);
         return modelMapper.map(savedDriver, DriverDTO.class);
+    }
+
+    @Override
+    public String refreshToken(String refreshToken) {
+
+        Long userId = jwtService.getUserIdFromToken(refreshToken);
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new ResourceNotFoundException("User not found with id: "+userId)
+        );
+
+        return jwtService.generateAccessToken(user);
     }
 }

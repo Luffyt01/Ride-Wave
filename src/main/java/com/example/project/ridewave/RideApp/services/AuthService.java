@@ -5,9 +5,12 @@ import com.example.project.ridewave.RideApp.dto.SignupDTO;
 import com.example.project.ridewave.RideApp.dto.UserDTO;
 
 public interface AuthService {
-    String login(String email, String password);
+    String[] login(String email, String password);
 
     UserDTO signup(SignupDTO signupDTO);
 
     DriverDTO onboardNewDriver(Long userId, String vehicleId);
+
+    String refreshToken(String refreshToken);
+
 }

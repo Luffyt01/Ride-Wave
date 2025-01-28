@@ -2,6 +2,7 @@ package com.example.project.ridewave.RideApp.services;
 
 import com.example.project.ridewave.RideApp.dto.DriverDTO;
 import com.example.project.ridewave.RideApp.dto.RideDTO;
+import com.example.project.ridewave.RideApp.dto.RiderDTO;
 import com.example.project.ridewave.RideApp.entities.Driver;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,7 +17,7 @@ public interface DriverService {
 
     RideDTO endRide(Long rideId);
 
-    RideDTO rateRider(Long rideId, Integer rating);
+    RiderDTO rateRider(Long rideId, Integer rating);
 
     DriverDTO getMyProfile();
 

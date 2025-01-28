@@ -11,6 +11,7 @@ import com.example.project.ridewave.RideApp.exceptions.ResourceNotFoundException
 import com.example.project.ridewave.RideApp.repositories.RideRequestRepository;
 import com.example.project.ridewave.RideApp.repositories.RiderRepository;
 import com.example.project.ridewave.RideApp.services.DriverService;
+import com.example.project.ridewave.RideApp.services.RatingService;
 import com.example.project.ridewave.RideApp.services.RideService;
 import com.example.project.ridewave.RideApp.services.RiderService;
 import com.example.project.ridewave.RideApp.strategies.RideStrategyManager;
@@ -19,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +38,7 @@ public class RiderServiceImpl implements RiderService {
     private final ModelMapper modelMapper;
     private final RideService rideService;
     private final DriverService driverService;
+    private final RatingService ratingService;
 
     @Override
     @Transactional // using transactional will not make any change if any error occur in the function
@@ -84,7 +87,21 @@ public class RiderServiceImpl implements RiderService {
 
     @Override
     public DriverDTO rateDriver(Long rideId, Integer rating) {
-        return null;
+        Ride ride = rideService.getRideById(rideId);
+        Rider rider = getCurrentRider();
+
+        // checking if the current rider is the same rider who has requested the rideRequest
+        if (!rider.equals(ride.getRider())){
+            throw new RuntimeException("Rider is not the owner of this ride");
+        }
+
+        // Checking if the ride status is ENDED
+        // If ride status is CANCELED, ONGOING, CONFIRMED then throw exception
+        if (!ride.getRideStatus().equals(RideStatus.ENDED)){
+            throw new RuntimeException("Ride status is not ENDED hence cannot start rating, status: "+ride.getRideStatus());
+        }
+
+        return ratingService.rateDriver(ride,rating);
     }
 
     @Override
@@ -113,8 +130,9 @@ public class RiderServiceImpl implements RiderService {
 
     @Override
     public Rider getCurrentRider() {
-        return riderRepository.findById(1L).orElseThrow(() -> new ResourceNotFoundException(
-                "Rider not found with id: "+ 1L
-        ));
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        return riderRepository.findByUser(user)
+                .orElseThrow(() -> new ResourceNotFoundException("Rider not associated with user with id: "+user.getId()));
     }
 }

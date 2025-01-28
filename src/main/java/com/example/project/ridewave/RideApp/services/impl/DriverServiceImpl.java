@@ -2,21 +2,21 @@ package com.example.project.ridewave.RideApp.services.impl;
 
 import com.example.project.ridewave.RideApp.dto.DriverDTO;
 import com.example.project.ridewave.RideApp.dto.RideDTO;
+import com.example.project.ridewave.RideApp.dto.RiderDTO;
 import com.example.project.ridewave.RideApp.entities.Driver;
 import com.example.project.ridewave.RideApp.entities.Ride;
 import com.example.project.ridewave.RideApp.entities.RideRequest;
+import com.example.project.ridewave.RideApp.entities.User;
 import com.example.project.ridewave.RideApp.entities.enums.RideRequestStatus;
 import com.example.project.ridewave.RideApp.entities.enums.RideStatus;
 import com.example.project.ridewave.RideApp.exceptions.ResourceNotFoundException;
 import com.example.project.ridewave.RideApp.repositories.DriverRepository;
-import com.example.project.ridewave.RideApp.services.DriverService;
-import com.example.project.ridewave.RideApp.services.PaymentService;
-import com.example.project.ridewave.RideApp.services.RideRequestService;
-import com.example.project.ridewave.RideApp.services.RideService;
+import com.example.project.ridewave.RideApp.services.*;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +31,7 @@ public class DriverServiceImpl implements DriverService {
     private final RideService rideService;
     private final ModelMapper modelMapper;
     private final PaymentService paymentService;
+    private final RatingService ratingService;
 
     @Override
     public RideDTO acceptRide(Long rideRequestId) {
@@ -115,6 +116,7 @@ public class DriverServiceImpl implements DriverService {
         Ride savedRide = rideService.updateRideStatus(ride, RideStatus.ONGOING);
 
         paymentService.createNewPayment(savedRide);
+        ratingService.createNewRating(savedRide);
 
         return modelMapper.map(savedRide, RideDTO.class);
     }
@@ -148,7 +150,7 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
-    public RideDTO rateRider(Long rideId, Integer rating) {
+    public RiderDTO rateRider(Long rideId, Integer rating) {
         Ride ride = rideService.getRideById(rideId);
         Driver driver = getCurrentDriver();
 
@@ -163,7 +165,7 @@ public class DriverServiceImpl implements DriverService {
             throw new RuntimeException("Ride status is not ENDED hence cannot start rating, status: "+ride.getRideStatus());
         }
 
-        return null;
+        return ratingService.rateRider(ride,rating);
     }
 
     @Override
@@ -183,8 +185,11 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     public Driver getCurrentDriver() {
-        return driverRepository.findById(2L)
-                .orElseThrow(() -> new ResourceNotFoundException("Driver not found with id "+2L));
+
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        return driverRepository.findByUser(user)
+                .orElseThrow(() -> new ResourceNotFoundException("Driver not found with user id "+user.getId()));
     }
 
     @Override

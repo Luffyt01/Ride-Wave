@@ -1,10 +1,19 @@
 package com.example.project.ridewave.RideApp.services.impl;
 
+import com.example.project.ridewave.RideApp.dto.DriverDTO;
+import com.example.project.ridewave.RideApp.dto.RiderDTO;
 import com.example.project.ridewave.RideApp.entities.Driver;
+import com.example.project.ridewave.RideApp.entities.Rating;
+import com.example.project.ridewave.RideApp.entities.Ride;
 import com.example.project.ridewave.RideApp.entities.Rider;
+import com.example.project.ridewave.RideApp.exceptions.ResourceNotFoundException;
+import com.example.project.ridewave.RideApp.exceptions.RuntimeConflictException;
+import com.example.project.ridewave.RideApp.repositories.DriverRepository;
 import com.example.project.ridewave.RideApp.repositories.RatingRepository;
+import com.example.project.ridewave.RideApp.repositories.RiderRepository;
 import com.example.project.ridewave.RideApp.services.RatingService;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -12,14 +21,62 @@ import org.springframework.stereotype.Service;
 public class RatingServiceImpl implements RatingService {
 
     private final RatingRepository ratingRepository;
+    private final DriverRepository driverRepository;
+    private final RiderRepository riderRepository;
+    private final ModelMapper modelMapper;
 
     @Override
-    public void rateDriver(Driver driver, Integer rating) {
+    public DriverDTO rateDriver(Ride ride, Integer rating) {
+        Driver driver = ride.getDriver();
+        Rating ratingObj = ratingRepository.findByRide(ride)
+                .orElseThrow(() -> new ResourceNotFoundException("Rating not found for ride with id: "+ride.getId()));
 
+        if (ratingObj.getDriverRating()!=null){
+            throw new RuntimeConflictException("Driver has already been rated, cannot rate again");
+        }
+        ratingObj.setDriverRating(rating);
+        ratingRepository.save(ratingObj);
+
+        Double newRating = ratingRepository.findByDriver(driver)
+                .stream()
+                .mapToDouble(Rating::getDriverRating)
+                .average()
+                .orElse(0.0);
+
+        driver.setRating(newRating);
+        Driver savedDriver = driverRepository.save(driver);
+        return modelMapper.map(savedDriver, DriverDTO.class);
     }
 
     @Override
-    public void rateRider(Rider rider, Integer rating) {
+    public RiderDTO rateRider(Ride ride, Integer rating) {
+        Rider rider = ride.getRider();
+        Rating ratingObj = ratingRepository.findByRide(ride)
+                .orElseThrow(() -> new ResourceNotFoundException("Rating not found for ride with id: "+ride.getId()));
 
+        if (ratingObj.getRiderRating()!=null){
+            throw new RuntimeConflictException("Rider has already been rated, cannot rate again");
+        }
+        ratingObj.setRiderRating(rating);
+        ratingRepository.save(ratingObj);
+
+        Double newRating = ratingRepository.findByRider(rider)
+                .stream()
+                .mapToDouble(Rating::getRiderRating)
+                .average()
+                .orElse(0.0);
+
+        rider.setRating(newRating);
+        Rider  savedDriver = riderRepository.save(rider);
+        return modelMapper.map(savedDriver, RiderDTO.class);
+    }
+
+    @Override
+    public void createNewRating(Ride ride) {
+        Rating rating = Rating.builder()
+                .rider(ride.getRider())
+                .driver(ride.getDriver())
+                .build();
+        ratingRepository.save(rating);
     }
 }

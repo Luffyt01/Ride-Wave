@@ -7,11 +7,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/drivers")
+@Secured("ROLE_DRIVER")
 public class DriverController {
 
     private final DriverService driverService;
@@ -39,7 +41,7 @@ public class DriverController {
     }
 
     @PostMapping("/rateRider")
-    public ResponseEntity<RideDTO> rateRider(@RequestBody RatingDTO ratingDTO){
+    public ResponseEntity<RiderDTO> rateRider(@RequestBody RatingDTO ratingDTO){
         return ResponseEntity.ok(driverService.rateRider(ratingDTO.getRideId(), ratingDTO.getRating()));
     }
 
@@ -55,5 +57,9 @@ public class DriverController {
                 Sort.by(Sort.Direction.DESC, "createdTime","id"));
         return ResponseEntity.ok(driverService.getAllMyRides(pageRequest));
     }
+
+
+
+
 
 }

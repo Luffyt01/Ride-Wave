@@ -1,16 +1,14 @@
 package com.example.project.ridewave.RideApp.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 @Table(
         indexes = {
                 @Index(name = "idx_rating_rider", columnList = "rider_id"),
