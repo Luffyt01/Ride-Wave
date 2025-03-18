@@ -29,7 +29,7 @@
 
 ## 📌 ER Diagram  
 
-![ER Diagram](path_to_your_er_diagram.png)  
+![ER Diagram](RideWave_ER_Diagram.png)  
 
 *(Replace `path_to_your_er_diagram.png` with the actual image path in your repo.)*  
 
@@ -37,7 +37,7 @@
 
 ## 📌 Flow Diagram  
 
-![Flow Diagram](path_to_your_flow_diagram.png)  
+![Flow Diagram](RideWave_FlowDiagram.png)  
 
 *(Replace `path_to_your_flow_diagram.png` with the actual image path in your repo.)*  
 
