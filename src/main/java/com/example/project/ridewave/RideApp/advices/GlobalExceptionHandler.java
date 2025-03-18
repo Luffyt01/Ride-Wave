@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+// Global class for handling multiple errors in one class
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 

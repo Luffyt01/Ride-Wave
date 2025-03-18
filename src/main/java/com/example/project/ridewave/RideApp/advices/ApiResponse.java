@@ -5,6 +5,8 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+// Class for modify the api response format
+
 @Data
 public class ApiResponse<T> {
 

@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
+// Class for making a default Error message
+
 @Data
 @Builder
 public class ApiError {
