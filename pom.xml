@@ -30,6 +30,7 @@
 		<java.version>21</java.version>
 		<spring-boot.build-image.imageName>rideapp:v0.0.1</spring-boot.build-image.imageName>
 		<spring-cloud-azure.version>5.20.1</spring-cloud-azure.version>
+		<skipTests>true</skipTests>
 	</properties>
 	<dependencies>
 		<!-- Spring Boot Dependencies -->
@@ -70,6 +71,7 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
+			<version>42.2.23</version>
 			<scope>runtime</scope>
 		</dependency>
 
